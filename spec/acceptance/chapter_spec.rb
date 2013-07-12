@@ -5,11 +5,7 @@ describe "Authoring a Chapter" do
   let(:file) { "#{ENV["ROOT"]}/chapters/introduction.md" }
 
   before do
-    `./bin/marthur chapter #{title}`
-  end
-
-  specify "adding a chapter" do
-    File.exists?(file).should be_true
+    Marthur::App.new.chapter title
   end
 
   describe "the title" do
