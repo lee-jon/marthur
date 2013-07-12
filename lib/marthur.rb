@@ -1,26 +1,30 @@
 require "marthur/version"
+require "marthur/file_store"
 require 'pathname'
+require 'thor'
 
 module Marthur
-  extend self
+  class App < Thor
+    package_name "Mauthor"
 
-  def call args
-    method = args[0]
-    public_send(method, args[1..-1])
-  end
+    desc "chapter [TITLE]", "generate a titled chapter"
+    def chapter title=""
+      `mkdir -p #{Config.root_path}/chapters`
+      file_name = title.downcase.gsub(/s+/,'-').gsub(/\W/, '')
+      path = Pathname.new %(#{Config.root_path}/chapters/#{file_name}.md)
+      io = FileStore.new(path)
 
-  def chapter *args
-    title = args[0][0]
-    file_name = title.downcase.gsub(/s+/,'-').gsub(/\W/, '')
-    path = Pathname.new %(#{root_path}/chapters/#{file_name}.md)
-
-    `mkdir -p #{root_path}/chapters`
-    File.open path, 'w+' do |file|
-      file.write "# #{title}"
+      Chapter.new(io) do |chapter|
+        chapter.title = title
+      end
     end
   end
 
-  def root_path
-    ENV['ROOT'] || '.'
+  module Config
+    extend self
+
+    def root_path
+      ENV['ROOT'] || '.'
+    end
   end
 end
